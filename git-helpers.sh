@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# TODO: Error handling and input validation/sanitation
+
 function vcs(){
     # Show the usage help in case no arguments (or the help flag) were provided
     if [ -z ${1+x} ] || ([ $1 == '-h' ] || [ $1 == '--help' ]); then
@@ -65,6 +67,7 @@ EOF
         [p]=push
         [pr]=pull-request
         [s]=search
+        [sp]=sprint
         [us]=update-sprint
     )
 
@@ -430,6 +433,12 @@ function vcs-search() {
     for RESULT in "${UNIQUERESULTS[@]}"; do
         echo "$RESULT"
     done
+}
+
+function vcs-sprint() {
+    SPRINT=$1
+
+    vcs checkout "release/sprint_${SPRINT}"
 }
 
 function vcs-select-result() {
