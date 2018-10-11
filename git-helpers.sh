@@ -325,14 +325,43 @@ function vcs-pull-request() {
     BRANCH=$(vcs current-branch)
     ENDPOINT=''
     PUSH_URL=$(git remote get-url --push origin)
+    COMPARE_TO='master'
 
     # We need to push first to make sure we have a remote push url
     vcs push
 
+    # Determine ticket number
+    TICKET=$(vcs-current-branch | grep -o -P '(?<=\/SS-)[0-9]+(?=_)')
+
+    # Check whether we need to compare the branch with the sprint release branch instead of master
+    # if [[ $BRANCH == "sprint\_${SPRINT}\/SS-${TICKET}_"* ]]; then
+    if [[ $BRANCH == "sprint_${SPRINT}/SS-${TICKET}_"* ]]; then
+        COMPARE_TO="release/sprint_$SPRINT"
+    fi
+
+    if [ "$TICKET" == '' ]; then
+        TICKET_URL="None"
+    else
+        TICKET_URL="https%3A%2F%2Fonlineprepaidservices.atlassian.net%2Fbrowse%2FSS-$TICKET"
+    fi
+
+    # Determine sprint number
+    SPRINT=$(vcs-current-branch | grep -o -P '(?<=sprint_)[0-9]+(?=\/)')
+
+    # Specify body
+    BODY="pull_request%5Bbody%5D=%23%23%23%20Ticket%3A%0A${TICKET_URL}%0A%0A%23%23%23%20Description%3A%0AAdd%20your%20custom%20description%0A%0A%23%23%23%20How%20to%20test%3A%0A1.%20See%20code"
+
+    METHOD='start'
+    TYPE="$(type -t ${METHOD})"
+
+    if [ "$TYPE" != "file" ]; then
+        METHOD='open'
+    fi
+
     # Render the PR endpoint for github
     if [[ $PUSH_URL == *"github.com:"* ]]; then
         REPOSITORY=$(echo "$PUSH_URL" | grep -o -P '(?<=\:).*(?=\.git)')
-        ENDPOINT="https://github.com/$REPOSITORY/compare/$BRANCH?expand=1"
+        ENDPOINT="https://github.com/${REPOSITORY}/compare/${COMPARE_TO}...${BRANCH}?expand=1"
     fi
 
     # Without an endpoint there's no reason to continue
@@ -341,15 +370,8 @@ function vcs-pull-request() {
         return 0
     fi
 
-    METHOD='start'
-    TYPE="$(type -t ${METHOD})"
-
-    if [ "$TYPE" != "function" ]; then
-        METHOD='open'
-    fi
-
     # TODO: Make sure this also works for repositories hosted by bitbucket
-    $METHOD "https://github.com/$REPOSITORY/compare/$BRANCH"
+    $METHOD "${ENDPOINT}&${BODY}"
 }
 
 function vcs-push() {
