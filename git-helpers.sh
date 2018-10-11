@@ -35,6 +35,7 @@ Branching methods:
 Workflow methods:
     master                                      Checkout the master branch
     pull-request                                Create a pull request for the active branch
+    update-sprint [SPRINT]                      Merge the master branch into the given sprint release branch
 EOF
 
         return 0
@@ -58,6 +59,7 @@ EOF
         [p]=push
         [pr]=pull-request
         [s]=search
+        [us]=update-sprint
     )
 
     METHOD="$1"
@@ -410,4 +412,9 @@ function vcs-select-result() {
         echo "$RESULT"
         break
     done
+}
+
+function vcs-update-sprint() {
+    SPRINT=$1
+    vcs merge master "release/sprint_$SPRINT" --push
 }
