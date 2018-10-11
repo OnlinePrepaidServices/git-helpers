@@ -34,6 +34,7 @@ Branching methods:
 
 Workflow methods:
     master                                      Checkout the master branch
+    new-story [SPRINT] [TITLE]                  Checkout a new story branch on a given sprint, with a given title
     pull-request                                Create a pull request for the active branch
     update-sprint [SPRINT]                      Merge the master branch into the given sprint release branch
 EOF
@@ -56,6 +57,7 @@ EOF
         [d]=discard
         [me]=merge
         [ma]=master
+        [ns]=new-story
         [p]=push
         [pr]=pull-request
         [s]=search
@@ -292,6 +294,13 @@ function vcs-merge() {
     if [ "$STASHED_CHANGES" != 'No local changes to save' ]; then
         vcs stash pop
     fi
+}
+
+function vcs-new-story() {
+    SPRINT="$1"
+    TITLE="$2"
+
+    vcs-checkout-new "sprint_$SPRINT/$TITLE" "release/sprint_$SPRINT"
 }
 
 function vcs-pull-request() {
