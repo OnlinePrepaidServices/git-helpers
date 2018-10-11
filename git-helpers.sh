@@ -34,6 +34,7 @@ Branching methods:
 
 Workflow methods:
     master                                      Checkout the master branch
+    new-bug [SPRINT] [TITLE]                    Checkout a new bug branch on a given sprint, with a given title
     new-story [SPRINT] [TITLE]                  Checkout a new story branch on a given sprint, with a given title
     pull-request                                Create a pull request for the active branch
     update-sprint [SPRINT]                      Merge the master branch into the given sprint release branch
@@ -57,6 +58,7 @@ EOF
         [d]=discard
         [me]=merge
         [ma]=master
+        [nb]=new-bug
         [ns]=new-story
         [p]=push
         [pr]=pull-request
@@ -301,6 +303,13 @@ function vcs-new-story() {
     TITLE="$2"
 
     vcs-checkout-new "sprint_$SPRINT/$TITLE" "release/sprint_$SPRINT"
+}
+
+function vcs-new-bug() {
+    SPRINT="$1"
+    TITLE="$2"
+
+    vcs-checkout-new "sprint_$SPRINT/bug/$TITLE" "master"
 }
 
 function vcs-pull-request() {
