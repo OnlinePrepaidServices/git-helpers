@@ -337,7 +337,6 @@ function vcs-pull-request() {
     TICKET=$(vcs-current-branch | grep -o -P '(?<=\/SS-)[0-9]+(?=_)')
 
     # Check whether we need to compare the branch with the sprint release branch instead of master
-    # if [[ $BRANCH == "sprint\_${SPRINT}\/SS-${TICKET}_"* ]]; then
     if [[ $BRANCH == "sprint_${SPRINT}/SS-${TICKET}_"* ]]; then
         COMPARE_TO="release/sprint_$SPRINT"
     fi
@@ -365,6 +364,10 @@ function vcs-pull-request() {
     if [[ $PUSH_URL == *"github.com:"* ]]; then
         REPOSITORY=$(echo "$PUSH_URL" | grep -o -P '(?<=\:).*(?=\.git)')
         ENDPOINT="https://github.com/${REPOSITORY}/compare/${COMPARE_TO}...${BRANCH}?expand=1"
+    # Render the PR endpoint for bitbucket
+    elif [[ $PUSH_URL == *"bitbucket.org"* ]]; then
+        REPOSITORY=$(echo "$PUSH_URL" | grep -o -P '(?<=bitbucket.org\/).*(?=\.git)')
+        ENDPOINT="https://bitbucket.org/${REPOSITORY}/pull-requests/new?source=${REPOSITORY}:${BRANCH}"
     fi
 
     # Without an endpoint there's no reason to continue
