@@ -40,6 +40,7 @@ Workflow methods:
     new-instant [SPRINT] [TITLE]                Checkout a new instant branch on a given sprint, with a given title
     new-story [SPRINT] [TITLE]                  Checkout a new story branch on a given sprint, with a given title
     pull-request                                Create a pull request for the active branch
+    update                                      Merge the relevant base branch into the current branch (master for bug/instant-, release_XX for story branches)
     update-sprint [SPRINT]                      Merge the master branch into the given sprint release branch
 EOF
 
@@ -68,6 +69,7 @@ EOF
         [pr]=pull-request
         [s]=search
         [sp]=sprint
+        [u]=update
         [us]=update-sprint
     )
 
@@ -473,6 +475,24 @@ function vcs-select-result() {
         echo "$RESULT"
         break
     done
+}
+
+function vcs-update() {
+    CURRENT_BRANCH=$(vcs-current-branch)
+    UPDATE_WITH='master'
+
+    # Determine ticket number
+    TICKET=$(echo "${CURRENT_BRANCH}" | grep -o -P '(?<=\/SS-)[0-9]+(?=_)')
+
+    # Determine sprint number
+    SPRINT=$(echo "${CURRENT_BRANCH}" | grep -o -P '(?<=sprint_)[0-9]+(?=\/)')
+
+    # Check whether we need to update the branch with the sprint release branch instead of master
+    if [[ $CURRENT_BRANCH == "sprint_${SPRINT}/SS-${TICKET}_"* ]]; then
+        UPDATE_WITH="release/sprint_$SPRINT"
+    fi
+
+    vcs merge "${UPDATE_WITH}" "${CURRENT_BRANCH}"
 }
 
 function vcs-update-sprint() {
