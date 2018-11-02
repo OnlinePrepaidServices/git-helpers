@@ -149,7 +149,7 @@ function vcs-commit-all() {
 }
 
 function vcs-commit-all-pull-request() {
-    vcs-commit-all-push $1 && vcs-pull-request $2
+    vcs-commit-all-push "${1}" && vcs-pull-request $2
 }
 
 function vcs-commit-all-push() {
@@ -389,8 +389,12 @@ function vcs-push() {
 
 function vcs-sanitize-branch-name() {
     BRANCH=$1
+
     BRANCH=$(echo $BRANCH | sed -e "s/\&/ and /g")
     BRANCH=$(echo $BRANCH | sed -e "s/\ /_/g")
+
+    # TODO: Make sure branch names uphold one of the startselect format
+    # sprint_xx/([bug|instant]\/)?SS-XXXX_Summay
 
     echo "$BRANCH"
 }
